@@ -39,27 +39,40 @@
 							WHERE `child_section_field_id` = {$field->get("id")}
 							LIMIT 1");
 						$linked_field_id = $field->get("related_field_id");
+					} else if ($field->get('type') == "checkbox") {
+						$linked_section_id = false;
+						
+						$el = new XMLElement("entry", 'Yes');
+						$el->setAttribute('id', 'yes');
+						$this->_Result->appendChild($el);
+						
+						$el = new XMLElement("entry", 'No');
+						$el->setAttribute('id', 'no');
+						$this->_Result->appendChild($el);
+	
 					}
 				}
 			}
 
-			/*	Got the linked field, now get the other end of the
-			**	link. Use the first Visible column as the output handle
-			*/
-			$linked_field_id = $this->_driver->fetchVisibleFieldID($linked_section_id);
-
-			/*	Foreach entry in the linked section, display the first
-			**	column to be selected
-			*/
-			$entries = $entryManager->fetch(null,$linked_section_id);
-			foreach($entries as $entry) {
-				$data = current($entryManager->fetch($entry->get('id'),$linked_section_id));
-				$values = $data->getData($linked_field_id);
-
-				$el = new XMLElement("entry", General::sanitize($values['value']));
-				$el->setAttribute('id', $entry->get('id'));
-
-				$this->_Result->appendChild($el);
+			if ($linked_section_id) {
+				/*	Got the linked field, now get the other end of the
+				**	link. Use the first Visible column as the output handle
+				*/
+				$linked_field_id = $this->_driver->fetchVisibleFieldID($linked_section_id);
+	
+				/*	Foreach entry in the linked section, display the first
+				**	column to be selected
+				*/
+				$entries = $entryManager->fetch(null,$linked_section_id);
+				foreach($entries as $entry) {
+					$data = current($entryManager->fetch($entry->get('id'),$linked_section_id));
+					$values = $data->getData($linked_field_id);
+	
+					$el = new XMLElement("entry", General::sanitize($values['value']));
+					$el->setAttribute('id', $entry->get('id'));
+	
+					$this->_Result->appendChild($el);
+				}
 			}
 		}
 
